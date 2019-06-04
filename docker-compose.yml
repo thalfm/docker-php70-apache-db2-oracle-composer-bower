@@ -1,0 +1,58 @@
+version: "3.2"
+services:
+  php-db2-oracle:
+    container_name: php
+    image: php:7.0-db2-oracle
+    build:
+      context: .
+    volumes:
+      - ./../sigtv/:/var/www/html/sigtv
+      - ./configs/docker-php-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+      - ./configs/sigtv.conf:/etc/apache2/sites-available/sigtv.conf
+    ports:
+      - "8080:80"
+    depends_on: 
+      - composer
+    environment:
+    #Alterar para o ip da sua máquina
+      XDEBUG_CONFIG: remote_host=10.68.101.45
+    working_dir: /var/www/html/sigtv/public
+    networks:
+      - development-network
+  composer:
+    container_name: composer
+    image: composer:1.8.5
+    volumes:
+      - ./../sigtv/:/sigtv
+    working_dir: /sigtv
+    command: ['composer', 'install', '--ignore-platform-reqs', '--no-scripts'] 
+  bower:
+    container_name: bower
+    image: thalfm/bower
+    build:
+      dockerfile: dockerfile-node-bower
+      context: .
+    user: root
+    volumes:
+      - ./../sigtv/:/sigtv
+    working_dir: /sigtv
+  pgsql:
+    container_name: pgsql
+    restart: always
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: SIGTV
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - development-network
+networks:
+  development-network:
+    driver: bridge
+volumes:
+  pgdata:
+    driver: local

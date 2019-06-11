@@ -13,6 +13,8 @@ services:
     environment:
       XDEBUG_CONFIG: remote_host=${YOUR_IP}
     working_dir: ${WORKING_DIR_APP}
+    networks:
+      - development-network
   composer:
     container_name: composer
     image: composer:1.8.5

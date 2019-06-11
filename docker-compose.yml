@@ -1,0 +1,35 @@
+version: "3.2"
+services:
+  php-db2-oracle:
+    container_name: php_sigtv
+    image: php:7.0-db2-oracle
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    volumes:
+      - ${VOLUME_APP}
+    ports:
+      - ${APP_PORT}:80
+    environment:
+      XDEBUG_CONFIG: remote_host=${YOUR_IP}
+    working_dir: ${WORKING_DIR_APP}
+  composer:
+    container_name: composer
+    image: composer:1.8.5
+    volumes:
+      - ${VOLUME_APP_COMPOSER}
+    working_dir: ${WORKING_DIR_APP_COMPOSER}
+    command: ['composer', 'install', '--ignore-platform-reqs', '--no-scripts']
+  bower:
+    container_name: bower
+    image: basis/bower
+    build:
+      dockerfile: node-bower/Dockerfile
+      context: .
+    user: root
+    volumes:
+      - ${VOLUME_APP_BOWER}
+    working_dir: ${WORKING_DIR_APP_BOWER}
+networks:
+  development-network:
+    driver: bridge
